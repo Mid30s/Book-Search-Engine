@@ -43,15 +43,24 @@ const resolvers = {
     },
 
     //add saveBook to the mutation
-    saveBook: async (parent, { bookData }, context) => {
-      if (context.user) {
-        const updatedUser = await User.findOneAndUpdate(
-          { _id: context.user._id },
-          { $addToSet: { savedBooks: bookData } },
-          { new: true, runValidators: true }
-        );
+    saveBook: async (parent, { newSaved }, context) => {
+      //debug
+      console.log("saveBook input:", newSaved);
+      console.log("saveBook context: ", context);
 
-        return updatedUser;
+      try {
+        if (context.user) {
+          const updatedUser = await User.findOneAndUpdate(
+            { _id: context.user._id },
+            { $addToSet: { savedBooks: newSaved } },
+            { new: true, runValidators: true }
+          );
+
+          return updatedUser;
+        }
+      } catch (error) {
+        console.log("saveBook error: ", error);
+        throw error;
       }
 
       throw new AuthenticationError("You need to be logged in!");

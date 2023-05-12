@@ -34,11 +34,15 @@ const SearchBooks = () => {
     try {
       const response = await searchGoogleBooks(searchInput);
 
+      console.log(response);
+
       if (!response.ok) {
         throw new Error("something went wrong!");
       }
 
       const { items } = await response.json();
+
+      console.log(items);
 
       const bookData = items.map((book) => ({
         bookId: book.id,
@@ -60,6 +64,8 @@ const SearchBooks = () => {
     // find the book in `searchedBooks` state by the matching id
     const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
 
+    console.log("bookToSave:", bookToSave);
+
     // get token
     const token = Auth.loggedIn() ? Auth.getToken() : null;
 
@@ -67,8 +73,17 @@ const SearchBooks = () => {
       return false;
     }
 
+    // create a new object to match server-side BookInput
+    const bookInput = {
+      bookId: bookToSave.bookId,
+      authors: bookToSave.authors,
+      description: bookToSave.description,
+      title: bookToSave.title,
+      image: bookToSave.image || null,
+    };
+
     try {
-      const { data } = await saveBook({ variables: { input: bookToSave } });
+      const { data } = await saveBook({ variables: { newSaved: bookInput } });
 
       if (!data) {
         throw new Error("something went wrong!");
@@ -77,7 +92,7 @@ const SearchBooks = () => {
       // if book successfully saves to user's account, save book id to state
       setSavedBookIds([...savedBookIds, bookToSave.bookId]);
     } catch (err) {
-      console.error(err);
+      console.error("Error saving book:", err);
     }
   };
 
@@ -117,8 +132,8 @@ const SearchBooks = () => {
         <Row>
           {searchedBooks.map((book) => {
             return (
-              <Col md="4">
-                <Card key={book.bookId} border="dark">
+              <Col md="4" key={book.bookId}>
+                <Card border="dark">
                   {book.image ? (
                     <Card.Img
                       src={book.image}
