@@ -46,7 +46,6 @@ const resolvers = {
     saveBook: async (parent, { newSaved }, context) => {
       //debug
       console.log("saveBook input:", newSaved);
-      console.log("saveBook context: ", context);
 
       try {
         if (context.user) {
